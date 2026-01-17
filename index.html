@@ -17,60 +17,54 @@
     <!-- Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-    <!-- Google Fonts: Nunito (Redondeada y Amigable) -->
+    <!-- Google Fonts: Inter (Muy limpia y digital) -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
         
-        :root {
-            --app-height: 100%;
-        }
-
-        html, body {
-            height: 100%; /* Fallback */
-            height: 100dvh; /* Altura dinámica real para móviles */
-            width: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden; /* Prevenir scroll elástico del body */
-        }
-
         body {
-            font-family: 'Nunito', sans-serif;
+            font-family: 'Inter', sans-serif;
             background-color: #0f172a; /* Slate 900 */
-            background-image: radial-gradient(circle at 50% 0%, #2e1065 0%, #0f172a 60%);
             color: #f8fafc;
+            overscroll-behavior: none;
             -webkit-tap-highlight-color: transparent;
         }
 
         /* Animaciones suaves */
-        .fade-enter { animation: fadeEnter 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-        .slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .fade-enter { animation: fadeEnter 0.4s ease-out forwards; }
+        .slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
         @keyframes fadeEnter {
-            from { opacity: 0; transform: scale(0.95) translateY(10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
         }
         @keyframes slideUp {
             from { transform: translateY(100%); }
             to { transform: translateY(0); }
         }
 
+        /* Efecto Neón sutil */
+        .neon-border {
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); /* Cyan glow */
+        }
+        
         .tap-effect:active {
-            transform: scale(0.96);
-            filter: brightness(0.9);
+            transform: scale(0.97);
+            background-color: #334155; /* Slate 700 */
         }
 
-        /* Áreas seguras para Notch y Barra de Inicio */
-        .pt-safe { padding-top: env(safe-area-inset-top, 20px); }
-        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+        /* Ajuste para móviles con notch */
+        .safe-bottom {
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
         
+        /* Ocultar scrollbar */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body>
+<body class="h-screen w-full flex flex-col overflow-hidden">
 
-    <div id="root" class="w-full h-full flex flex-col"></div>
+    <div id="root" class="w-full h-full max-w-md mx-auto relative flex flex-col"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
@@ -81,14 +75,15 @@
         const NUMERO_DEL_LIDER = ""; 
         // ==========================================
 
+        // Iconos Minimalistas Blancos
         const Icons = {
             play: (props) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}><path d="M8 5v14l11-7z"/></svg>,
             checkCircle: (props) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>,
             xCircle: (props) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>,
-            share: (props) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>,
-            restart: (props) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M1 4v6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M23 20v-6h-6"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>,
-            chevronRight: (props) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="9 18 15 12 9 6"/></svg>,
-            user: (props) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            share: (props) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>,
+            restart: (props) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>,
+            info: (props) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>,
+            chevronRight: (props) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="9 18 15 12 9 6"/></svg>
         };
 
         const questions = [
@@ -206,13 +201,14 @@
             const [isGenerating, setIsGenerating] = useState(false);
             const resultCardRef = useRef(null);
 
+            // Efecto Confeti Neón
             useEffect(() => {
                 if (gameState === 'result' && score >= 7) {
                     confetti({
-                        particleCount: 120,
-                        spread: 80,
+                        particleCount: 100,
+                        spread: 70,
                         origin: { y: 0.6 },
-                        colors: ['#a78bfa', '#2dd4bf', '#fb7185'],
+                        colors: ['#22d3ee', '#c084fc', '#f472b6'], // Cyan, Purple, Pink
                         disableForReducedMotion: true
                     });
                 }
@@ -255,7 +251,7 @@
             const handleShareWhatsApp = async () => {
                 setIsGenerating(true);
                 const simpleHash = btoa(userName + score).slice(0, 5).toUpperCase();
-                const messageText = `✨ MI RESULTADO ✨\n\n🚀 Tema: Topes\n👤 Soy: ${userName}\n🌟 Nota: ${score}/${questions.length}`;
+                const messageText = `🎮 NIVEL COMPLETADO\n\n🎯 Misión: Topes\n👤 Player: ${userName}\n💠 Score: ${score}/${questions.length}`;
 
                 await new Promise(resolve => setTimeout(resolve, 300));
 
@@ -263,13 +259,13 @@
                     try {
                         const canvas = await html2canvas(resultCardRef.current, {
                             scale: 2,
-                            backgroundColor: "#1e293b",
+                            backgroundColor: "#1e293b", // Slate 800 para que no salga transparente
                             useCORS: true
                         });
                         
                         canvas.toBlob(async (blob) => {
                             if (blob) {
-                                const file = new File([blob], "mi_progreso.png", { type: "image/png" });
+                                const file = new File([blob], "score.png", { type: "image/png" });
                                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                                     try {
                                         await navigator.share({
@@ -303,36 +299,37 @@
             // --- VISTA: INICIO ---
             if (gameState === 'start') {
                 return (
-                    <div className="flex-1 flex flex-col justify-center items-center p-6 md:p-8 fade-enter relative overflow-hidden h-full">
+                    <div className="flex-1 flex flex-col justify-center items-center p-8 fade-enter relative bg-slate-900">
+                        {/* Decoración de fondo */}
+                        <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-cyan-900/20 to-transparent pointer-events-none"></div>
                         
-                        <div className="z-10 w-full max-w-sm text-center">
-                            {/* Icono más amigable */}
-                            <div className="inline-flex items-center justify-center w-24 h-24 rounded-[2rem] bg-indigo-600/20 text-indigo-400 mb-6 md:mb-8 border border-indigo-500/30 shadow-[0_0_30px_rgba(99,102,241,0.2)] transform rotate-3 transition hover:rotate-6">
-                                <Icons.user className="w-12 h-12" />
+                        <div className="z-10 w-full max-w-sm">
+                            <div className="mb-10 text-center">
+                                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-800 border border-slate-700 shadow-2xl shadow-cyan-500/10 mb-6">
+                                    <svg className="w-10 h-10 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                </div>
+                                <h1 className="text-4xl font-extrabold text-white tracking-tight mb-2">ROMPIENDO <span className="text-cyan-400">TOPES</span></h1>
+                                <p className="text-slate-400 font-medium text-sm tracking-widest uppercase">Evaluación de Liderazgo</p>
                             </div>
-                            
-                            <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight mb-2 leading-tight">
-                                Rompiendo <br/>
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Topes</span> 🚀
-                            </h1>
-                            <p className="text-slate-400 font-semibold mb-8 text-lg">Test de Liderazgo</p>
 
-                            <form onSubmit={handleStart} className="space-y-4 w-full">
+                            <form onSubmit={handleStart} className="space-y-4">
                                 <div>
                                     <input 
                                         type="text" 
                                         value={userName}
                                         onChange={(e) => setUserName(e.target.value)}
-                                        placeholder="👋 ¿Cómo te llamas?"
-                                        className="w-full bg-slate-800/80 text-white border-2 border-transparent focus:border-indigo-500 rounded-2xl px-6 py-4 md:py-5 text-center text-lg font-bold outline-none transition-all placeholder-slate-500 shadow-lg"
+                                        placeholder="Ingresa tu Nombre"
+                                        className="w-full bg-slate-800 text-white border border-slate-700 rounded-xl px-5 py-4 text-center text-lg focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all placeholder-slate-500"
                                         required
                                     />
                                 </div>
-                                <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 md:py-5 rounded-2xl shadow-xl shadow-indigo-600/30 transition-all active:scale-95 flex items-center justify-center gap-3 text-lg tap-effect">
-                                    ¡Empezar! <Icons.play className="w-6 h-6" />
+                                <button type="submit" className="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all active:scale-95 flex items-center justify-center gap-2 text-lg uppercase tracking-wide">
+                                    <Icons.play className="w-6 h-6" /> Iniciar
                                 </button>
                             </form>
                         </div>
+                        
+                        <div className="absolute bottom-6 text-slate-600 text-xs font-mono">v2.0 • DARK EDITION</div>
                     </div>
                 );
             }
@@ -340,103 +337,116 @@
             // --- VISTA: RESULTADO ---
             if (gameState === 'result') {
                 return (
-                    <div className="flex-1 flex flex-col items-center justify-center p-6 fade-enter overflow-y-auto w-full h-full">
+                    <div className="flex-1 flex flex-col items-center justify-center p-6 bg-slate-900 fade-enter overflow-y-auto">
                         
-                        <h2 className="text-indigo-200 font-bold text-lg mb-4 flex items-center gap-2 bg-indigo-900/30 px-4 py-1 rounded-full border border-indigo-500/20">
-                            ✨ ¡Terminaste!
+                        <h2 className="text-white font-bold text-xl mb-6 flex items-center gap-2">
+                            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Resultado Final
                         </h2>
 
-                        {/* TARJETA DE RESULTADO */}
-                        <div ref={resultCardRef} className="w-full max-w-sm bg-slate-800/90 backdrop-blur rounded-[2rem] p-6 md:p-8 border border-slate-700 shadow-2xl relative overflow-hidden mb-4">
-                            {/* Decoración */}
-                            <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl"></div>
-                            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl"></div>
+                        {/* TARJETA DE RESULTADO OSCURA */}
+                        <div ref={resultCardRef} className="w-full max-w-sm bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-2xl relative overflow-hidden">
+                            {/* Gradiente sutil superior */}
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500"></div>
                             
-                            <div className="text-center mb-4 relative z-10">
-                                <div className="text-slate-400 font-bold uppercase text-xs tracking-wider mb-1">Líder</div>
-                                <h3 className="text-2xl md:text-3xl font-black text-white truncate px-2">{userName}</h3>
+                            <div className="flex justify-between items-start mb-8">
+                                <div>
+                                    <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Candidato</p>
+                                    <h3 className="text-2xl font-bold text-white leading-none">{userName}</h3>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Fecha</p>
+                                    <p className="text-slate-300 text-xs font-mono">{new Date().toLocaleDateString()}</p>
+                                </div>
                             </div>
 
-                            <div className="flex items-center justify-center py-4 relative z-10">
-                                <div className="relative w-40 h-40 flex items-center justify-center bg-slate-900/50 rounded-full border-4 border-slate-800 shadow-inner">
-                                    <svg className="w-full h-full transform -rotate-90 p-2">
-                                        <circle cx="50%" cy="50%" r="70" stroke="#334155" strokeWidth="14" fill="none" strokeLinecap="round" />
-                                        <circle cx="50%" cy="50%" r="70" stroke="#818cf8" strokeWidth="14" fill="none" 
+                            <div className="flex items-center justify-center py-6">
+                                <div className="relative w-40 h-40 flex items-center justify-center">
+                                    {/* Círculo de progreso SVG */}
+                                    <svg className="w-full h-full transform -rotate-90">
+                                        <circle cx="80" cy="80" r="70" stroke="#1e293b" strokeWidth="12" fill="none" />
+                                        <circle cx="80" cy="80" r="70" stroke="#06b6d4" strokeWidth="12" fill="none" 
                                             strokeDasharray={440}
                                             strokeDashoffset={440 - (440 * score / questions.length)}
                                             strokeLinecap="round"
-                                            className="drop-shadow-[0_0_10px_rgba(129,140,248,0.5)]"
                                         />
                                     </svg>
                                     <div className="absolute text-center">
-                                        <span className="block text-4xl md:text-5xl font-black text-white">{score}</span>
-                                        <span className="block text-xs text-indigo-300 font-bold uppercase mt-1">de {questions.length}</span>
+                                        <span className="block text-4xl font-black text-white">{score}</span>
+                                        <span className="block text-xs text-slate-400 font-bold uppercase">de {questions.length}</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="text-center mt-2 relative z-10">
-                                <p className={`text-xl font-black ${score >= 7 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                    {score === questions.length ? "🦄 ¡Nivel Experto!" : score >= 7 ? "🎉 ¡Muy Bien!" : "📚 ¡A Repasar!"}
+                            <div className="text-center mb-4">
+                                <p className={`text-lg font-bold ${score >= 7 ? 'text-green-400' : 'text-orange-400'}`}>
+                                    {score === questions.length ? "¡PERFECTO!" : score >= 7 ? "¡APROBADO!" : "NECESITAS REPASAR"}
                                 </p>
                             </div>
                         </div>
 
                         {/* BOTONES FIJOS INFERIORES */}
-                        <div className="w-full max-w-sm space-y-3 pb-safe">
+                        <div className="w-full max-w-sm mt-8 space-y-3 safe-bottom">
                             <button 
                                 onClick={handleShareWhatsApp}
                                 disabled={isGenerating}
-                                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-900/50 flex items-center justify-center gap-2 active:scale-95 transition-all tap-effect"
+                                className="w-full bg-slate-800 border border-slate-600 hover:bg-slate-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all"
                             >
-                                {isGenerating ? "Creando imagen..." : <><Icons.share className="w-5 h-5" /> Compartir Logro</>}
+                                {isGenerating ? "Procesando..." : <><Icons.share className="w-5 h-5 text-cyan-400" /> Compartir Resultado</>}
                             </button>
                             
-                            <button onClick={handleRestart} className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-4 rounded-2xl flex items-center justify-center gap-2 transition-colors border border-slate-700">
-                                <Icons.restart className="w-5 h-5" /> Volver a intentar
+                            <button onClick={handleRestart} className="w-full bg-transparent hover:bg-slate-800 text-slate-400 font-semibold py-4 rounded-xl flex items-center justify-center gap-2 transition-colors">
+                                <Icons.restart className="w-5 h-5" /> Intentar de nuevo
                             </button>
                         </div>
                     </div>
                 );
             }
 
-            // --- VISTA: PREGUNTAS (LAYOUT FLUIDO) ---
+            // --- VISTA: PREGUNTAS (LAYOUT MÓVIL OPTIMIZADO) ---
             return (
-                <div className="flex-1 flex flex-col h-full relative max-w-md mx-auto w-full">
-                    {/* Header con Notch Support */}
-                    <div className="px-5 pt-safe pb-4 flex justify-between items-center z-10 bg-gradient-to-b from-[#0f172a] to-transparent">
-                        <div className="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden border border-slate-700">
+                <div className="flex-1 flex flex-col bg-slate-900 h-full">
+                    {/* 1. Header Fijo Superior */}
+                    <div className="px-6 py-4 flex justify-between items-center bg-slate-900/90 backdrop-blur-md z-10 border-b border-slate-800">
+                        <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
                             <div 
-                                className="bg-gradient-to-r from-indigo-500 to-purple-500 h-full transition-all duration-500 ease-out rounded-full"
+                                className="bg-gradient-to-r from-cyan-500 to-blue-500 h-full transition-all duration-300 ease-out"
                                 style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
                             ></div>
                         </div>
-                        <div className="ml-4 font-bold text-indigo-400 whitespace-nowrap bg-indigo-900/30 px-3 py-1 rounded-lg text-sm border border-indigo-500/20">
-                            {currentQuestion + 1}/{questions.length}
+                        <div className="ml-4 text-xs font-mono text-cyan-400 whitespace-nowrap">
+                            {currentQuestion + 1} / {questions.length}
                         </div>
                     </div>
 
-                    {/* Contenido con Scroll fluido */}
-                    <div className="flex-1 overflow-y-auto no-scrollbar px-5 pb-24">
-                        <h2 className="text-xl md:text-2xl font-black text-white mb-6 leading-snug drop-shadow-sm">
+                    {/* 2. Área de Contenido con Scroll si es necesario */}
+                    <div className="flex-1 overflow-y-auto no-scrollbar p-6">
+                        <h2 className="text-xl md:text-2xl font-bold text-white mb-8 leading-snug">
                             {questions[currentQuestion].questionText}
                         </h2>
 
-                        <div className="space-y-3"> 
+                        <div className="space-y-3 pb-20"> {/* Padding bottom extra para no chocar con el bottom sheet */}
                             {questions[currentQuestion].answerOptions.map((option, index) => {
-                                let btnClass = "w-full text-left p-4 md:p-5 rounded-2xl border-2 border-slate-700 bg-slate-800/50 transition-all active:scale-[0.97] tap-effect font-semibold text-slate-200 shadow-sm text-sm md:text-base";
+                                // Lógica de estilos para estados: Normal, Seleccionado Correcto, Seleccionado Incorrecto, No Seleccionado
+                                let btnClass = "w-full text-left p-5 rounded-xl border border-slate-700 bg-slate-800 transition-all active:scale-[0.98] tap-effect";
+                                let textClass = "text-slate-300 font-medium";
                                 
+                                // Si ya se mostró feedback, deshabilitamos hover y cambiamos colores
                                 if (showFeedback) {
                                     if (index === selectedAnswerIndex) {
                                         if (option.isCorrect) {
-                                            btnClass = "w-full text-left p-4 md:p-5 rounded-2xl border-2 border-emerald-500 bg-emerald-500/20 text-emerald-300 font-bold shadow-[0_0_15px_rgba(16,185,129,0.2)] text-sm md:text-base";
+                                            btnClass = "w-full text-left p-5 rounded-xl border border-green-500 bg-green-500/10";
+                                            textClass = "text-green-400 font-bold";
                                         } else {
-                                            btnClass = "w-full text-left p-4 md:p-5 rounded-2xl border-2 border-rose-500 bg-rose-500/20 text-rose-300 font-bold text-sm md:text-base";
+                                            btnClass = "w-full text-left p-5 rounded-xl border border-red-500 bg-red-500/10";
+                                            textClass = "text-red-400 font-bold";
                                         }
                                     } else if (option.isCorrect) {
-                                        btnClass = "w-full text-left p-4 md:p-5 rounded-2xl border-2 border-emerald-500/50 bg-emerald-500/10 text-emerald-200/70 opacity-80 text-sm md:text-base";
+                                        // Mostrar la correcta si nos equivocamos
+                                        btnClass = "w-full text-left p-5 rounded-xl border border-green-500/30 bg-green-500/5 opacity-70";
+                                        textClass = "text-green-300";
                                     } else {
-                                        btnClass = "w-full text-left p-4 md:p-5 rounded-2xl border-2 border-slate-800 bg-slate-900 text-slate-600 opacity-50 text-sm md:text-base";
+                                        // Las demás opacas
+                                        btnClass += " opacity-30";
                                     }
                                 }
 
@@ -447,45 +457,37 @@
                                         disabled={showFeedback}
                                         className={btnClass}
                                     >
-                                        {option.answerText}
+                                        <span className={textClass}>{option.answerText}</span>
                                     </button>
                                 );
                             })}
                         </div>
                     </div>
 
-                    {/* Feedback (Bottom Sheet Seguro) */}
+                    {/* 3. Panel de Feedback Deslizable (Bottom Sheet) */}
                     {showFeedback && (
-                        <div className="fixed bottom-0 left-0 right-0 w-full max-w-md mx-auto bg-[#1e293b] rounded-t-[2rem] shadow-[0_-10px_50px_rgba(0,0,0,0.6)] border-t border-slate-700 slide-up z-20 pb-safe">
-                            {/* Manija decorativa */}
-                            <div className="w-12 h-1.5 bg-slate-600 rounded-full mx-auto mt-3 mb-1 opacity-50"></div>
-                            
-                            <div className="p-6 pt-2">
+                        <div className="fixed bottom-0 left-0 w-full bg-slate-800 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)] border-t border-slate-700 slide-up z-20 safe-bottom">
+                            <div className="p-6">
                                 <div className="flex items-center gap-3 mb-3">
-                                    <div className={`p-2 rounded-full ${isCorrect ? 'bg-emerald-500/20' : 'bg-rose-500/20'}`}>
-                                        {isCorrect ? (
-                                            <Icons.checkCircle className="w-6 h-6 md:w-8 md:h-8 text-emerald-400" />
-                                        ) : (
-                                            <Icons.xCircle className="w-6 h-6 md:w-8 md:h-8 text-rose-400" />
-                                        )}
-                                    </div>
-                                    <span className={`text-xl md:text-2xl font-black ${isCorrect ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                        {isCorrect ? '¡Eso es! 🎉' : 'Oh no... 😅'}
+                                    {isCorrect ? (
+                                        <Icons.checkCircle className="w-8 h-8 text-green-400" />
+                                    ) : (
+                                        <Icons.xCircle className="w-8 h-8 text-red-400" />
+                                    )}
+                                    <span className={`text-xl font-bold ${isCorrect ? 'text-green-400' : 'text-red-400'}`}>
+                                        {isCorrect ? '¡Correcto!' : 'Incorrecto'}
                                     </span>
                                 </div>
                                 
-                                <div className="bg-slate-900/50 p-4 rounded-2xl border border-slate-700/50 mb-5 max-h-[150px] overflow-y-auto no-scrollbar">
-                                    <p className="text-indigo-200 font-bold text-[10px] uppercase mb-1 tracking-wider">La explicación:</p>
-                                    <p className="text-slate-300 text-sm leading-relaxed font-medium">
-                                        {questions[currentQuestion].explanation}
-                                    </p>
-                                </div>
+                                <p className="text-slate-300 text-sm leading-relaxed mb-6 pl-11">
+                                    {questions[currentQuestion].explanation}
+                                </p>
 
                                 <button 
                                     onClick={handleNext} 
-                                    className="w-full bg-white hover:bg-slate-100 text-slate-900 font-black py-4 rounded-2xl active:scale-95 transition-transform flex justify-center items-center gap-2 text-base md:text-lg shadow-xl"
+                                    className="w-full bg-white text-slate-900 font-bold py-4 rounded-xl active:scale-95 transition-transform flex justify-center items-center gap-2"
                                 >
-                                    {currentQuestion === questions.length - 1 ? "Ver Resultados" : "Siguiente"} <Icons.chevronRight className="w-5 h-5"/>
+                                    {currentQuestion === questions.length - 1 ? "Ver Resultados" : "Continuar"} <Icons.chevronRight className="w-5 h-5"/>
                                 </button>
                             </div>
                         </div>
