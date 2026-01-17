@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación: Rompiendo Topes</title>
+    <!-- React y ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel para JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Tailwind CSS para estilos -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Html2Canvas para generar la imagen del resultado -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f3f4f6;
+            overscroll-behavior: none; 
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Clase para ocultar elementos visualmente pero mantenerlos en el DOM para la captura */
+        .capture-only {
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div id="root" class="w-full max-w-md"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // ==========================================
+        // ⚙️ CONFIGURACIÓN DEL LÍDER
+        // ==========================================
+        // Escribe tu número con código de país (Ej: 52155...)
+        // Nota: Al compartir imagen, el usuario elegirá el contacto manualmente.
+        // Este número se usa principalmente para el modo "solo texto".
+        const NUMERO_DEL_LIDER = ""; 
+        // ==========================================
+
+        // --- ICONOS SVG ---
+        const Icons = {
+            user: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            ),
+            play: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            ),
+            trophy: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            ),
+            "check-circle": (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            ),
+            "x-circle": (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            ),
+            brain: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
+            ),
+            "arrow-right": (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            ),
+            send: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            ),
+            "rotate-ccw": (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            ),
+            share: (props) => (
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            ),
+            loader: (props) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin" {...props}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            )
+        };
+
+        const questions = [
+            {
+                questionText: "¿Cuál es la premisa principal de la 'Ley del Tope'?",
+                answerOptions: [
+                    { answerText: "El ministerio crece sin importar lo que haga el líder.", isCorrect: false },
+                    { answerText: "El crecimiento del ministerio se detiene donde el líder se detiene.", isCorrect: true },
+                    { answerText: "El ministerio crece solo si hay recursos financieros.", isCorrect: false },
+                    { answerText: "Los miembros siempre crecen más rápido que los líderes.", isCorrect: false },
+                ],
+                explanation: "Tú eres el techo de tu organización. Si tú dejas de crecer, bloqueas el crecimiento de todo el ministerio."
+            },
+            {
+                questionText: "En la metáfora del edificio, si tú eres el ascensor y llegas al piso 8, ¿qué pasa con tu gente?",
+                answerOptions: [
+                    { answerText: "Suben por las escaleras al piso 20.", isCorrect: false },
+                    { answerText: "Se quedan en la planta baja.", isCorrect: false },
+                    { answerText: "Llegan solo hasta el piso 8 contigo.", isCorrect: true },
+                    { answerText: "Buscan otro ascensor inmediatamente.", isCorrect: false },
+                ],
+                explanation: "Nadie puede ir más allá de donde su líder lo lleva. Tu nivel de madurez es el límite de ellos."
+            },
+            {
+                questionText: "¿Qué consecuencia trae una gran unción sobre un carácter inmaduro?",
+                answerOptions: [
+                    { answerText: "Produce podredumbre y destrucción.", isCorrect: true },
+                    { answerText: "Acelera la madurez del líder.", isCorrect: false },
+                    { answerText: "Santifica automáticamente al líder.", isCorrect: false },
+                    { answerText: "No tiene ninguna consecuencia negativa.", isCorrect: false },
+                ],
+                explanation: "El don sin carácter corrompe. Necesitas estructura interna para soportar el peso de la bendición."
+            },
+            {
+                questionText: "¿Qué significa hacer la obra 'indolentemente' según Jeremías 48:10?",
+                answerOptions: [
+                    { answerText: "Hacerla muy rápido.", isCorrect: false },
+                    { answerText: "Hacerla con negligencia, apatía o por cumplir.", isCorrect: true },
+                    { answerText: "Hacerla sin dinero.", isCorrect: false },
+                    { answerText: "Hacerla con mucho dolor.", isCorrect: false },
+                ],
+                explanation: "La indolencia es una actitud de tibieza y descuido que Dios condena severamente en el liderazgo."
+            },
+            {
+                questionText: "Si los miembros son 'Computadoras Cuánticas', ¿tú qué eres en la analogía?",
+                answerOptions: [
+                    { answerText: "El antivirus.", isCorrect: false },
+                    { answerText: "La electricidad.", isCorrect: false },
+                    { answerText: "La Red de Internet (conexión).", isCorrect: true },
+                    { answerText: "El teclado.", isCorrect: false },
+                ],
+                explanation: "Tú eres la conexión. Si tu red es lenta (tu liderazgo), limitas la velocidad de ellos, aunque sean potentes."
+            },
+            {
+                questionText: "Según Proverbios 16:18, ¿dónde se origina realmente el tope?",
+                answerOptions: [
+                    { answerText: "En lo externo (circunstancias).", isCorrect: false },
+                    { answerText: "En lo interno (soberbia, carácter).", isCorrect: true },
+                    { answerText: "En la falta de apoyo.", isCorrect: false },
+                    { answerText: "En el enemigo.", isCorrect: false },
+                ],
+                explanation: "Antes de la caída hay altivez. El problema raíz siempre está adentro: falta de gestión emocional o formación."
+            },
+            {
+                questionText: "Según el consejo de Jetro a Moisés (Éxodo 18), ¿qué pasa si el líder no delega?",
+                answerOptions: [
+                    { answerText: "El líder se vuelve más fuerte.", isCorrect: false },
+                    { answerText: "Desfallece el líder y también el pueblo.", isCorrect: true },
+                    { answerText: "El pueblo aprende a esperar.", isCorrect: false },
+                    { answerText: "Dios se agrada del esfuerzo.", isCorrect: false },
+                ],
+                explanation: "Un líder que lo hace todo se cansa y cansa a su gente. Delegar es vital para no ser el tope."
+            },
+            {
+                questionText: "¿Por qué es necesaria la humildad (Prov 11:2) para quitar un tope?",
+                answerOptions: [
+                    { answerText: "Para caerle bien a la gente.", isCorrect: false },
+                    { answerText: "Para reconocer que necesito corrección y organización.", isCorrect: true },
+                    { answerText: "Para parecer más espiritual.", isCorrect: false },
+                    { answerText: "La humildad no es necesaria.", isCorrect: false },
+                ],
+                explanation: "Sin humildad no puedes admitir que tienes un problema, y si no lo admites, no puedes cambiarlo."
+            },
+            {
+                questionText: "¿Qué implica la 'Formación Intencional' (2 Timoteo 2:15)?",
+                answerOptions: [
+                    { answerText: "Esperar a que la iglesia me capacite.", isCorrect: false },
+                    { answerText: "Aprender solo por experiencia.", isCorrect: false },
+                    { answerText: "Procurar activamente estudiar y prepararse.", isCorrect: true },
+                    { answerText: "Orar para recibir conocimiento sobrenatural.", isCorrect: false },
+                ],
+                explanation: "No es pasivo. Tú debes tener la intención de leer, estudiar y buscar crecimiento."
+            },
+            {
+                questionText: "¿Cuál es el objetivo final de romper nuestros topes?",
+                answerOptions: [
+                    { answerText: "Ser famosos.", isCorrect: false },
+                    { answerText: "Tener el ministerio más grande.", isCorrect: false },
+                    { answerText: "Multiplicarnos y que otros crezcan.", isCorrect: true },
+                    { answerText: "Trabajar menos.", isCorrect: false },
+                ],
+                explanation: "El éxito del líder es la multiplicación: que otros brillen y crezcan gracias a que tú les abriste camino."
+            }
+        ];
+
+        function App() {
+            const [gameState, setGameState] = useState('start');
+            const [userName, setUserName] = useState('');
+            const [currentQuestion, setCurrentQuestion] = useState(0);
+            const [score, setScore] = useState(0);
+            const [showFeedback, setShowFeedback] = useState(false);
+            const [isCorrect, setIsCorrect] = useState(false);
+            const [isSent, setIsSent] = useState(false);
+            const [isGenerating, setIsGenerating] = useState(false); // Estado de carga para la imagen
+
+            // Referencia para la captura de imagen
+            const resultCardRef = useRef(null);
+
+            const Icon = ({ component, className }) => {
+                const IconComponent = Icons[component];
+                if (!IconComponent) return null;
+                return <IconComponent className={className} />;
+            };
+
+            const handleStart = (e) => {
+                e.preventDefault();
+                if (userName.trim()) setGameState('quiz');
+            };
+
+            const handleAnswer = (isCorrect) => {
+                setIsCorrect(isCorrect);
+                setShowFeedback(true);
+                if (isCorrect) setScore(score + 1);
+            };
+
+            const handleNext = () => {
+                const nextQuestion = currentQuestion + 1;
+                if (nextQuestion < questions.length) {
+                    setCurrentQuestion(nextQuestion);
+                    setShowFeedback(false);
+                } else {
+                    setGameState('result');
+                }
+            };
+
+            const handleRestart = () => {
+                setScore(0);
+                setCurrentQuestion(0);
+                setGameState('start');
+                setUserName('');
+                setShowFeedback(false);
+                setIsSent(false);
+            };
+
+            // --- LÓGICA DE COMPARTIR WHATSAPP CON IMAGEN ---
+            const handleShareWhatsApp = async () => {
+                setIsGenerating(true);
+
+                // 1. Generar Código de Seguridad (Hash simple)
+                // Esto previene que editen el texto del resultado
+                const simpleHash = btoa(userName + score + "SECRET_KEY").slice(0, 8).toUpperCase();
+                
+                const messageText = `*EVALUACIÓN: ROMPIENDO TOPES*\n\n👤 Obrero: ${userName}\n📊 Nota: ${score}/${questions.length}\n🔐 Verificación: ${simpleHash}`;
+
+                // 2. Intentar generar imagen y usar Native Share (Móvil)
+                if (resultCardRef.current && navigator.share) {
+                    try {
+                        const canvas = await html2canvas(resultCardRef.current, {
+                            scale: 2, // Mejor calidad
+                            backgroundColor: "#ffffff"
+                        });
+                        
+                        canvas.toBlob(async (blob) => {
+                            if (blob) {
+                                const file = new File([blob], "resultado.png", { type: "image/png" });
+                                
+                                // Verificar si el dispositivo permite compartir archivos
+                                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                                    try {
+                                        await navigator.share({
+                                            files: [file],
+                                            title: 'Mi Resultado',
+                                            text: messageText,
+                                        });
+                                        setIsSent(true);
+                                    } catch (err) {
+                                        console.log("Error al compartir archivo:", err);
+                                        // Fallback si cancelan o falla
+                                        openWhatsAppTextFallback(messageText);
+                                    }
+                                } else {
+                                    openWhatsAppTextFallback(messageText);
+                                }
+                            }
+                        });
+                    } catch (error) {
+                        console.error("Error generando imagen:", error);
+                        openWhatsAppTextFallback(messageText);
+                    }
+                } else {
+                    // Fallback para PC o navegadores sin soporte
+                    openWhatsAppTextFallback(messageText);
+                }
+
+                setIsGenerating(false);
+                
+                // Enviar datos a Flutter si existe (Modo App)
+                const datosParaApp = JSON.stringify({
+                    usuario: userName,
+                    puntaje: score,
+                    total: questions.length,
+                    fecha: new Date().toISOString()
+                });
+                if (window.QuizChannel) window.QuizChannel.postMessage(datosParaApp);
+            };
+
+            const openWhatsAppTextFallback = (text) => {
+                const url = `https://wa.me/${NUMERO_DEL_LIDER}?text=${encodeURIComponent(text)}`;
+                window.open(url, '_blank');
+                setIsSent(true);
+            };
+
+            // --- PANTALLAS ---
+
+            if (gameState === 'start') {
+                return (
+                    <div className="bg-white rounded-2xl shadow-xl overflow-hidden animate-fade-in p-8 border-t-4 border-indigo-600">
+                        <div className="text-center mb-8">
+                            <div className="bg-indigo-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Icon component="user" className="w-10 h-10 text-indigo-600" />
+                            </div>
+                            <h1 className="text-2xl font-bold text-gray-800">Evaluación de Liderazgo</h1>
+                            <p className="text-gray-500 mt-2">Tema: Rompiendo Topes</p>
+                        </div>
+                        
+                        <form onSubmit={handleStart} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Tu Nombre Completo</label>
+                                <input 
+                                    type="text" 
+                                    value={userName}
+                                    onChange={(e) => setUserName(e.target.value)}
+                                    placeholder="Ej: Juan Pérez"
+                                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:outline-none transition-colors"
+                                    required
+                                />
+                            </div>
+                            <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-4 rounded-xl transition duration-300 flex items-center justify-center gap-2 shadow-lg text-lg">
+                                Comenzar Evaluación <Icon component="play" className="w-5 h-5" />
+                            </button>
+                        </form>
+                    </div>
+                );
+            }
+
+            if (gameState === 'result') {
+                return (
+                    <div className="w-full">
+                        {/* TARJETA DE RESULTADO VISIBLE (Y CAPTURABLE) */}
+                        <div ref={resultCardRef} className="bg-white rounded-2xl shadow-xl overflow-hidden animate-fade-in p-6 text-center border-t-8 border-indigo-600 relative">
+                             {/* Marca de agua para la imagen */}
+                            <div className="absolute top-2 right-2 opacity-10">
+                                <Icon component="trophy" className="w-24 h-24" />
+                            </div>
+
+                            <div className="flex justify-center mb-6">
+                                <div className="bg-yellow-100 p-5 rounded-full shadow-inner z-10">
+                                    <Icon component="trophy" className="w-20 h-20 text-yellow-600" />
+                                </div>
+                            </div>
+                            
+                            <h2 className="text-2xl font-bold text-gray-800 mb-1">Resultado de Evaluación</h2>
+                            <p className="text-lg text-indigo-600 font-medium mb-4">{userName}</p>
+                            
+                            <div className="text-6xl font-black text-gray-800 my-4 tracking-tighter">
+                                {score}<span className="text-2xl text-gray-400 font-normal">/{questions.length}</span>
+                            </div>
+                            
+                            <div className="p-4 bg-indigo-50 rounded-xl text-indigo-800 text-sm font-medium text-left mb-6 border border-indigo-100">
+                                {score === questions.length 
+                                    ? "🏆 ¡Perfecto! Entendiste la importancia de crecer para que tu ministerio crezca." 
+                                    : score >= 7
+                                        ? "🌟 ¡Muy bien! Tienes los conceptos claros. Sigue adelante." 
+                                        : "📚 Buen esfuerzo. Te animo a repasar la lección."}
+                            </div>
+                            
+                            {/* Fecha y validación visual */}
+                            <div className="text-xs text-gray-400 border-t pt-2 flex justify-between">
+                                <span>{new Date().toLocaleDateString()}</span>
+                                <span>ID: {Math.random().toString(36).substr(2, 6).toUpperCase()}</span>
+                            </div>
+                        </div>
+
+                        {/* BOTONES DE ACCIÓN (Fuera de la captura si quisieras, pero aquí están debajo) */}
+                        <div className="space-y-3 mt-6">
+                            {!isSent ? (
+                                <button 
+                                    onClick={handleShareWhatsApp}
+                                    disabled={isGenerating}
+                                    className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-4 rounded-xl transition duration-300 flex items-center justify-center gap-2 shadow-lg text-lg disabled:opacity-70"
+                                >
+                                    {isGenerating ? (
+                                        <>
+                                            <Icon component="loader" className="w-5 h-5" />
+                                            Generando Imagen...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Icon component="share" className="w-5 h-5" />
+                                            Enviar a WhatsApp
+                                        </>
+                                    )}
+                                </button>
+                            ) : (
+                                <div className="w-full bg-green-100 text-green-800 font-bold py-4 rounded-xl flex items-center justify-center gap-2 animate-fade-in border border-green-200">
+                                    <Icon component="check-circle" className="w-6 h-6" />
+                                    Resultados Enviados
+                                </div>
+                            )}
+                            
+                            <button 
+                                onClick={handleRestart}
+                                className="w-full bg-white border-2 border-gray-200 hover:bg-gray-50 text-gray-600 font-bold py-3 px-4 rounded-xl transition duration-300 flex items-center justify-center gap-2"
+                            >
+                                <Icon component="rotate-ccw" className="w-5 h-5" />
+                                Repetir Cuestionario
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="bg-white rounded-2xl shadow-xl overflow-hidden animate-fade-in w-full">
+                    <div className="bg-indigo-600 p-5 text-white flex justify-between items-center">
+                        <div className="text-sm font-medium bg-indigo-800/50 px-3 py-1 rounded-lg backdrop-blur-sm">{userName}</div>
+                        <div className="text-sm font-medium">{currentQuestion + 1} de {questions.length}</div>
+                    </div>
+                    <div className="w-full bg-gray-200 h-2">
+                        <div className="bg-indigo-500 h-2 transition-all duration-500" style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}></div>
+                    </div>
+                    <div className="p-6">
+                        <h2 className="text-xl font-bold text-gray-800 mb-6 leading-relaxed">{questions[currentQuestion].questionText}</h2>
+                        <div className="space-y-3">
+                            {!showFeedback ? (
+                                questions[currentQuestion].answerOptions.map((option, index) => (
+                                    <button key={index} onClick={() => handleAnswer(option.isCorrect)} className="w-full text-left p-4 rounded-xl border-2 border-gray-100 hover:border-indigo-500 hover:bg-indigo-50 transition-all duration-200 font-medium text-gray-700 active:scale-[0.98]">
+                                        {option.answerText}
+                                    </button>
+                                ))
+                            ) : (
+                                <div className={`rounded-xl border-2 animate-fade-in overflow-hidden ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                                    <div className={`p-4 flex items-center gap-3 ${isCorrect ? 'bg-green-100' : 'bg-red-100'}`}>
+                                        <Icon component={isCorrect ? "check-circle" : "x-circle"} className={`w-6 h-6 ${isCorrect ? 'text-green-600' : 'text-red-600'}`} />
+                                        <h3 className={`font-bold ${isCorrect ? 'text-green-800' : 'text-red-800'}`}>{isCorrect ? "¡Correcto!" : "Incorrecto"}</h3>
+                                    </div>
+                                    <div className="p-5">
+                                        <div className="flex items-start gap-3">
+                                            <Icon component="brain" className="w-5 h-5 text-indigo-500 mt-1 flex-shrink-0" />
+                                            <div>
+                                                <span className="text-xs font-bold text-indigo-500 uppercase tracking-wide">Lección:</span>
+                                                <p className="text-gray-700 mt-1 leading-relaxed text-sm">{questions[currentQuestion].explanation}</p>
+                                            </div>
+                                        </div>
+                                        <button onClick={handleNext} className={`w-full mt-6 py-4 px-4 rounded-xl font-bold text-white flex items-center justify-center gap-2 transition duration-300 shadow-md ${isCorrect ? 'bg-green-600 hover:bg-green-700' : 'bg-indigo-600 hover:bg-indigo-700'}`}>
+                                            {currentQuestion === questions.length - 1 ? "Ver Resultados Finales" : "Siguiente Pregunta"} <Icon component="arrow-right" className="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
