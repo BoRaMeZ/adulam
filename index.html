@@ -2,502 +2,348 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Evaluación: Rompiendo Topes</title>
-    
-    <!-- React y ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <!-- Babel para JSX -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- Tailwind CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Liderazgo: La Esencia de la Influencia</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Html2Canvas -->
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <!-- Confetti -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-    <!-- Google Fonts: Inter (Muy limpia y digital) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
         
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0f172a; /* Slate 900 */
-            color: #f8fafc;
-            overscroll-behavior: none;
-            -webkit-tap-highlight-color: transparent;
+            background: linear-gradient(135deg, #e0e7ff 0%, #f3f4f6 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* Animaciones suaves */
-        .fade-enter { animation: fadeEnter 0.4s ease-out forwards; }
-        .slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        
-        @keyframes fadeEnter {
-            from { opacity: 0; transform: scale(0.98); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px -10px rgba(79, 70, 229, 0.15);
         }
 
-        /* Efecto Neón sutil */
-        .neon-border {
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); /* Cyan glow */
-        }
-        
-        .tap-effect:active {
-            transform: scale(0.97);
-            background-color: #334155; /* Slate 700 */
+        .option-btn {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Ajuste para móviles con notch */
-        .safe-bottom {
-            padding-bottom: env(safe-area-inset-bottom, 20px);
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            border-color: #6366f1;
+        }
+
+        .option-btn.correct {
+            background-color: #ecfdf5 !important;
+            border-color: #10b981 !important;
+            color: #065f46 !important;
+        }
+
+        .option-btn.incorrect {
+            background-color: #fef2f2 !important;
+            border-color: #ef4444 !important;
+            color: #991b1b !important;
+        }
+
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        .slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .feedback-modal-backdrop {
+            background: rgba(17, 24, 39, 0.5);
+            backdrop-filter: blur(4px);
+            transition: opacity 0.3s ease;
         }
         
-        /* Ocultar scrollbar */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .progress-bar-fill { transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
 </head>
-<body class="h-screen w-full flex flex-col overflow-hidden">
+<body class="flex items-center justify-center p-4 min-h-screen text-gray-800">
 
-    <div id="root" class="w-full h-full max-w-md mx-auto relative flex flex-col"></div>
+    <div class="glass-panel w-full max-w-lg overflow-hidden relative flex flex-col min-h-[600px] border border-white/50">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 p-6 text-white text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+            <h1 class="text-2xl font-bold relative z-10">Liderazgo & Influencia</h1>
+            <p class="text-indigo-100 text-xs mt-1 font-medium tracking-wide uppercase relative z-10">Basado en John C. Maxwell</p>
+        </div>
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        <!-- Content Area -->
+        <div class="p-6 md:p-8 flex-grow flex flex-col relative z-0" id="app-content"></div>
 
-        // ==========================================
-        // ⚙️ CONFIGURACIÓN
-        // ==========================================
-        const NUMERO_DEL_LIDER = ""; 
-        // ==========================================
+        <!-- Branding Footer -->
+        <div class="bg-gray-50/80 p-3 text-center border-t border-gray-100">
+            <p class="text-[10px] text-gray-400 font-semibold tracking-wider uppercase">Desarrollo Personal • 2024</p>
+        </div>
+    </div>
 
-        // Iconos Minimalistas Blancos
-        const Icons = {
-            play: (props) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}><path d="M8 5v14l11-7z"/></svg>,
-            checkCircle: (props) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>,
-            xCircle: (props) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>,
-            share: (props) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>,
-            restart: (props) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>,
-            info: (props) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>,
-            chevronRight: (props) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="9 18 15 12 9 6"/></svg>
-        };
+    <!-- FEEDBACK MODAL -->
+    <div id="feedback-overlay" class="fixed inset-0 z-50 flex items-center justify-center feedback-modal-backdrop hidden opacity-0 px-4">
+        <div id="feedback-card" class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 transform scale-90 opacity-0 transition-all duration-300 border-4 border-white relative overflow-hidden text-center">
+            <div id="feedback-icon-container" class="w-16 h-16 mx-auto rounded-full flex items-center justify-center text-3xl mb-4 shadow-lg"></div>
+            <h2 id="feedback-title" class="text-2xl font-bold mb-2"></h2>
+            <div class="bg-gray-50 rounded-xl p-4 mb-6 text-left border border-gray-100">
+                <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Lección:</p>
+                <p id="feedback-text" class="text-gray-600 text-sm leading-relaxed font-medium"></p>
+            </div>
+            <button onclick="nextQuestion()" class="w-full py-3.5 rounded-xl font-bold text-white bg-indigo-600 shadow-lg flex items-center justify-center gap-2">
+                <span>Continuar</span> <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
 
-        const questions = [
+    <!-- LOADING OVERLAY -->
+    <div id="loading-overlay" class="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-black/80 hidden text-white text-center p-4">
+        <i class="fas fa-circle-notch fa-spin text-4xl mb-4 text-indigo-400"></i>
+        <h3 class="text-xl font-bold mb-2">Procesando...</h3>
+        <p class="text-sm text-gray-300" id="loading-text">Generando imagen de tu resultado.</p>
+    </div>
+
+    <script>
+        // --- CONFIGURACIÓN ---
+        const FALLBACK_PHONE = ""; // Número destino opcional (formato internacional)
+
+        const quizData = [
             {
-                questionText: "¿Cuál es la premisa principal de la 'Ley del Tope'?",
-                answerOptions: [
-                    { answerText: "El ministerio crece sin importar lo que haga el líder.", isCorrect: false },
-                    { answerText: "El crecimiento del ministerio se detiene donde el líder se detiene.", isCorrect: true },
-                    { answerText: "El ministerio crece solo si hay recursos financieros.", isCorrect: false },
-                    { answerText: "Los miembros siempre crecen más rápido que los líderes.", isCorrect: false },
-                ],
-                explanation: "Tú eres el techo de tu organización. Si tú dejas de crecer, bloqueas el crecimiento de todo el ministerio."
+                question: "¿Cuál es la verdadera medida del liderazgo?",
+                options: ["Gestión y administración", "Título o posición jerárquica", "Influencia, nada más", "Antigüedad en la empresa"],
+                correct: 2,
+                feedback: "El texto es tajante: si no tienes influencia, no puedes dirigir a otros, sin importar tu cargo."
             },
             {
-                questionText: "En la metáfora del edificio, si tú eres el ascensor y llegas al piso 8, ¿qué pasa con tu gente?",
-                answerOptions: [
-                    { answerText: "Suben por las escaleras al piso 20.", isCorrect: false },
-                    { answerText: "Se quedan en la planta baja.", isCorrect: false },
-                    { answerText: "Llegan solo hasta el piso 8 contigo.", isCorrect: true },
-                    { answerText: "Buscan otro ascensor inmediatamente.", isCorrect: false },
-                ],
-                explanation: "Nadie puede ir más allá de donde su líder lo lleva. Tu nivel de madurez es el límite de ellos."
+                question: "Completa el proverbio: 'El que se cree líder y no tiene seguidores...'",
+                options: ["...pierde el tiempo", "...sólo da un paseo", "...necesita más poder", "...es un soñador"],
+                correct: 1,
+                feedback: "Liderar implica gente siguiéndote. Si nadie te sigue, estás caminando solo, 'dando un paseo'."
             },
             {
-                questionText: "¿Qué consecuencia trae una gran unción sobre un carácter inmaduro?",
-                answerOptions: [
-                    { answerText: "Produce podredumbre y destrucción.", isCorrect: true },
-                    { answerText: "Acelera la madurez del líder.", isCorrect: false },
-                    { answerText: "Santifica automáticamente al líder.", isCorrect: false },
-                    { answerText: "No tiene ninguna consecuencia negativa.", isCorrect: false },
-                ],
-                explanation: "El don sin carácter corrompe. Necesitas estructura interna para soportar el peso de la bendición."
+                question: "¿Qué afirma el 'Mito de la Posición'?",
+                options: ["El cargo hace al líder", "El líder rechaza cargos", "La posición es vital", "El cargo es eterno"],
+                correct: 0,
+                feedback: "Es el error más común. La realidad es al revés: es el líder quien hace a la posición importante."
             },
             {
-                questionText: "¿Qué significa hacer la obra 'indolentemente' según Jeremías 48:10?",
-                answerOptions: [
-                    { answerText: "Hacerla muy rápido.", isCorrect: false },
-                    { answerText: "Hacerla con negligencia, apatía o por cumplir.", isCorrect: true },
-                    { answerText: "Hacerla sin dinero.", isCorrect: false },
-                    { answerText: "Hacerla con mucho dolor.", isCorrect: false },
-                ],
-                explanation: "La indolencia es una actitud de tibieza y descuido que Dios condena severamente en el liderazgo."
+                question: "Diferencia clave entre Gerente y Líder (Mito de la Administración):",
+                options: ["El salario", "El gerente mantiene, el líder cambia", "El líder organiza, el gerente inspira", "Son sinónimos"],
+                correct: 1,
+                feedback: "Un gerente mantiene el rumbo y los sistemas. Se requiere influencia (liderazgo) para cambiar el rumbo."
             },
             {
-                questionText: "Si los miembros son 'Computadoras Cuánticas', ¿tú qué eres en la analogía?",
-                answerOptions: [
-                    { answerText: "El antivirus.", isCorrect: false },
-                    { answerText: "La electricidad.", isCorrect: false },
-                    { answerText: "La Red de Internet (conexión).", isCorrect: true },
-                    { answerText: "El teclado.", isCorrect: false },
-                ],
-                explanation: "Tú eres la conexión. Si tu red es lenta (tu liderazgo), limitas la velocidad de ellos, aunque sean potentes."
+                question: "¿Qué aprendemos de Abraham Lincoln como 'Capitán'?",
+                options: ["Fue un éxito inmediato", "El título no le dio respeto", "La guerra era fácil", "Era muy estricto"],
+                correct: 1,
+                feedback: "A pesar de tener el título oficial, carecía de influencia y sus hombres no lo seguían."
             },
             {
-                questionText: "Según Proverbios 16:18, ¿dónde se origina realmente el tope?",
-                answerOptions: [
-                    { answerText: "En lo externo (circunstancias).", isCorrect: false },
-                    { answerText: "En lo interno (soberbia, carácter).", isCorrect: true },
-                    { answerText: "En la falta de apoyo.", isCorrect: false },
-                    { answerText: "En el enemigo.", isCorrect: false },
-                ],
-                explanation: "Antes de la caída hay altivez. El problema raíz siempre está adentro: falta de gestión emocional o formación."
+                question: "¿Por qué el pueblo no siguió a Josué inicialmente?",
+                options: ["Josué mentía", "Falta de influencia", "Miedo a Dios", "Era muy joven"],
+                correct: 1,
+                feedback: "Tenía la razón y la verdad, pero le faltaba la 'cuenta bancaria' de influencia con el pueblo."
             },
             {
-                questionText: "Según el consejo de Jetro a Moisés (Éxodo 18), ¿qué pasa si el líder no delega?",
-                answerOptions: [
-                    { answerText: "El líder se vuelve más fuerte.", isCorrect: false },
-                    { answerText: "Desfallece el líder y también el pueblo.", isCorrect: true },
-                    { answerText: "El pueblo aprende a esperar.", isCorrect: false },
-                    { answerText: "Dios se agrada del esfuerzo.", isCorrect: false },
-                ],
-                explanation: "Un líder que lo hace todo se cansa y cansa a su gente. Delegar es vital para no ser el tope."
+                question: "¿Qué es el 'Mito del Conocimiento'?",
+                options: ["Alto IQ = Líder", "Saber es poder", "Leer mucho ayuda", "Liderar es estudiar"],
+                correct: 0,
+                feedback: "Tener un coeficiente intelectual alto no garantiza seguidores. Hay muchos genios solitarios."
             },
             {
-                questionText: "¿Por qué es necesaria la humildad (Prov 11:2) para quitar un tope?",
-                answerOptions: [
-                    { answerText: "Para caerle bien a la gente.", isCorrect: false },
-                    { answerText: "Para reconocer que necesito corrección y organización.", isCorrect: true },
-                    { answerText: "Para parecer más espiritual.", isCorrect: false },
-                    { answerText: "La humildad no es necesaria.", isCorrect: false },
-                ],
-                explanation: "Sin humildad no puedes admitir que tienes un problema, y si no lo admites, no puedes cambiarlo."
+                question: "La 'Influencia por Esencia' bíblica se compara con:",
+                options: ["Martillo y Clavo", "Sal y Luz", "Rey y Trono", "Espada y Escudo"],
+                correct: 1,
+                feedback: "Como la sal da sabor y la luz ilumina, la mera presencia y carácter del líder cambian el ambiente."
             },
             {
-                questionText: "¿Qué implica la 'Formación Intencional' (2 Timoteo 2:15)?",
-                answerOptions: [
-                    { answerText: "Esperar a que la iglesia me capacite.", isCorrect: false },
-                    { answerText: "Aprender solo por experiencia.", isCorrect: false },
-                    { answerText: "Procurar activamente estudiar y prepararse.", isCorrect: true },
-                    { answerText: "Orar para recibir conocimiento sobrenatural.", isCorrect: false },
-                ],
-                explanation: "No es pasivo. Tú debes tener la intención de leer, estudiar y buscar crecimiento."
+                question: "¿Cómo lideraba Pablo según 1 Corintios 11:1?",
+                options: ["Imponiendo reglas", "Por decreto", "Invitando a imitarle", "Pagando salarios"],
+                correct: 2,
+                feedback: "Su liderazgo era por ejemplo: 'Sed imitadores de mí'. No exigía sumisión, inspiraba."
             },
             {
-                questionText: "¿Cuál es el objetivo final de romper nuestros topes?",
-                answerOptions: [
-                    { answerText: "Ser famosos.", isCorrect: false },
-                    { answerText: "Tener el ministerio más grande.", isCorrect: false },
-                    { answerText: "Multiplicarnos y que otros crezcan.", isCorrect: true },
-                    { answerText: "Trabajar menos.", isCorrect: false },
-                ],
-                explanation: "El éxito del líder es la multiplicación: que otros brillen y crezcan gracias a que tú les abriste camino."
+                question: "El liderazgo es un ______ que se debe ejercitar.",
+                options: ["Don mágico", "Músculo", "Privilegio", "Misterio"],
+                correct: 1,
+                feedback: "No es algo estático. Como un músculo, si no se trabaja conectando con la gente, se atrofia."
             }
         ];
 
-        function App() {
-            const [gameState, setGameState] = useState('start');
-            const [userName, setUserName] = useState('');
-            const [currentQuestion, setCurrentQuestion] = useState(0);
-            const [score, setScore] = useState(0);
-            const [showFeedback, setShowFeedback] = useState(false);
-            const [isCorrect, setIsCorrect] = useState(false);
-            const [selectedAnswerIndex, setSelectedAnswerIndex] = useState(null);
-            const [isSent, setIsSent] = useState(false);
-            const [isGenerating, setIsGenerating] = useState(false);
-            const resultCardRef = useRef(null);
+        let state = { userName: '', idx: 0, score: 0 };
+        const content = document.getElementById('app-content');
+        const overlay = document.getElementById('feedback-overlay');
+        const loadingOverlay = document.getElementById('loading-overlay');
 
-            // Efecto Confeti Neón
-            useEffect(() => {
-                if (gameState === 'result' && score >= 7) {
-                    confetti({
-                        particleCount: 100,
-                        spread: 70,
-                        origin: { y: 0.6 },
-                        colors: ['#22d3ee', '#c084fc', '#f472b6'], // Cyan, Purple, Pink
-                        disableForReducedMotion: true
-                    });
-                }
-            }, [gameState, score]);
-
-            const handleStart = (e) => {
-                e.preventDefault();
-                if (userName.trim()) setGameState('quiz');
-            };
-
-            const handleAnswer = (isCorrect, index) => {
-                if (showFeedback) return;
-                setIsCorrect(isCorrect);
-                setSelectedAnswerIndex(index);
-                setShowFeedback(true);
-                if (isCorrect) setScore(score + 1);
-            };
-
-            const handleNext = () => {
-                const nextQuestion = currentQuestion + 1;
-                if (nextQuestion < questions.length) {
-                    setCurrentQuestion(nextQuestion);
-                    setShowFeedback(false);
-                    setSelectedAnswerIndex(null);
-                } else {
-                    setGameState('result');
-                }
-            };
-
-            const handleRestart = () => {
-                setScore(0);
-                setCurrentQuestion(0);
-                setGameState('start');
-                setUserName('');
-                setShowFeedback(false);
-                setSelectedAnswerIndex(null);
-                setIsSent(false);
-            };
-
-            const handleShareWhatsApp = async () => {
-                setIsGenerating(true);
-                const simpleHash = btoa(userName + score).slice(0, 5).toUpperCase();
-                const messageText = `🎮 NIVEL COMPLETADO\n\n🎯 Misión: Topes\n👤 Player: ${userName}\n💠 Score: ${score}/${questions.length}`;
-
-                await new Promise(resolve => setTimeout(resolve, 300));
-
-                if (resultCardRef.current && navigator.share) {
-                    try {
-                        const canvas = await html2canvas(resultCardRef.current, {
-                            scale: 2,
-                            backgroundColor: "#1e293b", // Slate 800 para que no salga transparente
-                            useCORS: true
-                        });
-                        
-                        canvas.toBlob(async (blob) => {
-                            if (blob) {
-                                const file = new File([blob], "score.png", { type: "image/png" });
-                                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                                    try {
-                                        await navigator.share({
-                                            files: [file],
-                                            text: messageText,
-                                        });
-                                        setIsSent(true);
-                                    } catch (err) {
-                                        openWhatsAppTextFallback(messageText);
-                                    }
-                                } else {
-                                    openWhatsAppTextFallback(messageText);
-                                }
-                            }
-                        });
-                    } catch (error) {
-                        openWhatsAppTextFallback(messageText);
-                    }
-                } else {
-                    openWhatsAppTextFallback(messageText);
-                }
-                setIsGenerating(false);
-            };
-
-            const openWhatsAppTextFallback = (text) => {
-                const url = `https://wa.me/${NUMERO_DEL_LIDER}?text=${encodeURIComponent(text)}`;
-                window.open(url, '_blank');
-                setIsSent(true);
-            };
-
-            // --- VISTA: INICIO ---
-            if (gameState === 'start') {
-                return (
-                    <div className="flex-1 flex flex-col justify-center items-center p-8 fade-enter relative bg-slate-900">
-                        {/* Decoración de fondo */}
-                        <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-cyan-900/20 to-transparent pointer-events-none"></div>
-                        
-                        <div className="z-10 w-full max-w-sm">
-                            <div className="mb-10 text-center">
-                                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-800 border border-slate-700 shadow-2xl shadow-cyan-500/10 mb-6">
-                                    <svg className="w-10 h-10 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                                </div>
-                                <h1 className="text-4xl font-extrabold text-white tracking-tight mb-2">ROMPIENDO <span className="text-cyan-400">TOPES</span></h1>
-                                <p className="text-slate-400 font-medium text-sm tracking-widest uppercase">Evaluación de Liderazgo</p>
-                            </div>
-
-                            <form onSubmit={handleStart} className="space-y-4">
-                                <div>
-                                    <input 
-                                        type="text" 
-                                        value={userName}
-                                        onChange={(e) => setUserName(e.target.value)}
-                                        placeholder="Ingresa tu Nombre"
-                                        className="w-full bg-slate-800 text-white border border-slate-700 rounded-xl px-5 py-4 text-center text-lg focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all placeholder-slate-500"
-                                        required
-                                    />
-                                </div>
-                                <button type="submit" className="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all active:scale-95 flex items-center justify-center gap-2 text-lg uppercase tracking-wide">
-                                    <Icons.play className="w-6 h-6" /> Iniciar
-                                </button>
-                            </form>
-                        </div>
-                        
-                        <div className="absolute bottom-6 text-slate-600 text-xs font-mono">v2.0 • DARK EDITION</div>
+        function renderStart() {
+            content.innerHTML = `
+                <div class="flex flex-col h-full justify-center items-center text-center space-y-8 fade-in">
+                    <div class="w-24 h-24 bg-white border-4 border-indigo-100 rounded-full flex items-center justify-center text-indigo-600 text-3xl shadow-xl">
+                        <i class="fas fa-rocket"></i>
                     </div>
-                );
-            }
-
-            // --- VISTA: RESULTADO ---
-            if (gameState === 'result') {
-                return (
-                    <div className="flex-1 flex flex-col items-center justify-center p-6 bg-slate-900 fade-enter overflow-y-auto">
-                        
-                        <h2 className="text-white font-bold text-xl mb-6 flex items-center gap-2">
-                            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Resultado Final
-                        </h2>
-
-                        {/* TARJETA DE RESULTADO OSCURA */}
-                        <div ref={resultCardRef} className="w-full max-w-sm bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-2xl relative overflow-hidden">
-                            {/* Gradiente sutil superior */}
-                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500"></div>
-                            
-                            <div className="flex justify-between items-start mb-8">
-                                <div>
-                                    <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Candidato</p>
-                                    <h3 className="text-2xl font-bold text-white leading-none">{userName}</h3>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Fecha</p>
-                                    <p className="text-slate-300 text-xs font-mono">{new Date().toLocaleDateString()}</p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center justify-center py-6">
-                                <div className="relative w-40 h-40 flex items-center justify-center">
-                                    {/* Círculo de progreso SVG */}
-                                    <svg className="w-full h-full transform -rotate-90">
-                                        <circle cx="80" cy="80" r="70" stroke="#1e293b" strokeWidth="12" fill="none" />
-                                        <circle cx="80" cy="80" r="70" stroke="#06b6d4" strokeWidth="12" fill="none" 
-                                            strokeDasharray={440}
-                                            strokeDashoffset={440 - (440 * score / questions.length)}
-                                            strokeLinecap="round"
-                                        />
-                                    </svg>
-                                    <div className="absolute text-center">
-                                        <span className="block text-4xl font-black text-white">{score}</span>
-                                        <span className="block text-xs text-slate-400 font-bold uppercase">de {questions.length}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="text-center mb-4">
-                                <p className={`text-lg font-bold ${score >= 7 ? 'text-green-400' : 'text-orange-400'}`}>
-                                    {score === questions.length ? "¡PERFECTO!" : score >= 7 ? "¡APROBADO!" : "NECESITAS REPASAR"}
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* BOTONES FIJOS INFERIORES */}
-                        <div className="w-full max-w-sm mt-8 space-y-3 safe-bottom">
-                            <button 
-                                onClick={handleShareWhatsApp}
-                                disabled={isGenerating}
-                                className="w-full bg-slate-800 border border-slate-600 hover:bg-slate-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all"
-                            >
-                                {isGenerating ? "Procesando..." : <><Icons.share className="w-5 h-5 text-cyan-400" /> Compartir Resultado</>}
-                            </button>
-                            
-                            <button onClick={handleRestart} className="w-full bg-transparent hover:bg-slate-800 text-slate-400 font-semibold py-4 rounded-xl flex items-center justify-center gap-2 transition-colors">
-                                <Icons.restart className="w-5 h-5" /> Intentar de nuevo
-                            </button>
-                        </div>
+                    <div class="space-y-2">
+                        <h2 class="text-3xl font-bold text-gray-800">Bienvenido</h2>
+                        <p class="text-gray-500">¿Tienes la influencia necesaria?</p>
                     </div>
-                );
-            }
-
-            // --- VISTA: PREGUNTAS (LAYOUT MÓVIL OPTIMIZADO) ---
-            return (
-                <div className="flex-1 flex flex-col bg-slate-900 h-full">
-                    {/* 1. Header Fijo Superior */}
-                    <div className="px-6 py-4 flex justify-between items-center bg-slate-900/90 backdrop-blur-md z-10 border-b border-slate-800">
-                        <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                            <div 
-                                className="bg-gradient-to-r from-cyan-500 to-blue-500 h-full transition-all duration-300 ease-out"
-                                style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
-                            ></div>
-                        </div>
-                        <div className="ml-4 text-xs font-mono text-cyan-400 whitespace-nowrap">
-                            {currentQuestion + 1} / {questions.length}
-                        </div>
+                    <div class="w-full max-w-xs space-y-4">
+                        <input type="text" id="username" class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-xl outline-none focus:border-indigo-500 font-semibold text-gray-700" placeholder="Escribe tu nombre">
+                        <button onclick="startGame()" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl shadow-lg flex items-center justify-center gap-2 transition active:scale-95">
+                            Comenzar <i class="fas fa-arrow-right"></i>
+                        </button>
                     </div>
-
-                    {/* 2. Área de Contenido con Scroll si es necesario */}
-                    <div className="flex-1 overflow-y-auto no-scrollbar p-6">
-                        <h2 className="text-xl md:text-2xl font-bold text-white mb-8 leading-snug">
-                            {questions[currentQuestion].questionText}
-                        </h2>
-
-                        <div className="space-y-3 pb-20"> {/* Padding bottom extra para no chocar con el bottom sheet */}
-                            {questions[currentQuestion].answerOptions.map((option, index) => {
-                                // Lógica de estilos para estados: Normal, Seleccionado Correcto, Seleccionado Incorrecto, No Seleccionado
-                                let btnClass = "w-full text-left p-5 rounded-xl border border-slate-700 bg-slate-800 transition-all active:scale-[0.98] tap-effect";
-                                let textClass = "text-slate-300 font-medium";
-                                
-                                // Si ya se mostró feedback, deshabilitamos hover y cambiamos colores
-                                if (showFeedback) {
-                                    if (index === selectedAnswerIndex) {
-                                        if (option.isCorrect) {
-                                            btnClass = "w-full text-left p-5 rounded-xl border border-green-500 bg-green-500/10";
-                                            textClass = "text-green-400 font-bold";
-                                        } else {
-                                            btnClass = "w-full text-left p-5 rounded-xl border border-red-500 bg-red-500/10";
-                                            textClass = "text-red-400 font-bold";
-                                        }
-                                    } else if (option.isCorrect) {
-                                        // Mostrar la correcta si nos equivocamos
-                                        btnClass = "w-full text-left p-5 rounded-xl border border-green-500/30 bg-green-500/5 opacity-70";
-                                        textClass = "text-green-300";
-                                    } else {
-                                        // Las demás opacas
-                                        btnClass += " opacity-30";
-                                    }
-                                }
-
-                                return (
-                                    <button 
-                                        key={index} 
-                                        onClick={() => handleAnswer(option.isCorrect, index)}
-                                        disabled={showFeedback}
-                                        className={btnClass}
-                                    >
-                                        <span className={textClass}>{option.answerText}</span>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    {/* 3. Panel de Feedback Deslizable (Bottom Sheet) */}
-                    {showFeedback && (
-                        <div className="fixed bottom-0 left-0 w-full bg-slate-800 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)] border-t border-slate-700 slide-up z-20 safe-bottom">
-                            <div className="p-6">
-                                <div className="flex items-center gap-3 mb-3">
-                                    {isCorrect ? (
-                                        <Icons.checkCircle className="w-8 h-8 text-green-400" />
-                                    ) : (
-                                        <Icons.xCircle className="w-8 h-8 text-red-400" />
-                                    )}
-                                    <span className={`text-xl font-bold ${isCorrect ? 'text-green-400' : 'text-red-400'}`}>
-                                        {isCorrect ? '¡Correcto!' : 'Incorrecto'}
-                                    </span>
-                                </div>
-                                
-                                <p className="text-slate-300 text-sm leading-relaxed mb-6 pl-11">
-                                    {questions[currentQuestion].explanation}
-                                </p>
-
-                                <button 
-                                    onClick={handleNext} 
-                                    className="w-full bg-white text-slate-900 font-bold py-4 rounded-xl active:scale-95 transition-transform flex justify-center items-center gap-2"
-                                >
-                                    {currentQuestion === questions.length - 1 ? "Ver Resultados" : "Continuar"} <Icons.chevronRight className="w-5 h-5"/>
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
+                </div>`;
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        function startGame() {
+            const input = document.getElementById('username');
+            if(!input.value.trim()) return input.focus();
+            state.userName = input.value;
+            renderQuiz();
+        }
+
+        function renderQuiz() {
+            const q = quizData[state.idx];
+            const pct = (state.idx / quizData.length) * 100;
+            content.innerHTML = `
+                <div class="w-full h-full flex flex-col fade-in">
+                    <div class="flex justify-between items-end mb-2">
+                        <span class="text-xs font-bold text-indigo-500 uppercase">Pregunta ${state.idx + 1}/${quizData.length}</span>
+                        <div class="flex items-center gap-1 bg-indigo-50 px-2 py-1 rounded-lg">
+                            <i class="fas fa-star text-yellow-400 text-[10px]"></i>
+                            <span class="text-xs font-bold text-indigo-900">${state.score}</span>
+                        </div>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2 mb-6 overflow-hidden">
+                        <div class="bg-indigo-500 h-full rounded-full progress-bar-fill" style="width: ${pct}%"></div>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-6 leading-snug">${q.question}</h3>
+                    <div class="flex-grow space-y-3">
+                        ${q.options.map((opt, i) => `
+                            <button onclick="checkAnswer(${i}, this)" class="option-btn w-full text-left p-4 rounded-xl border-2 border-transparent bg-white shadow-sm text-gray-600 font-semibold text-sm flex items-center group">
+                                <span class="w-8 h-8 rounded-lg bg-gray-50 text-gray-400 font-bold flex items-center justify-center mr-4 group-hover:bg-indigo-50 group-hover:text-indigo-600 border border-gray-100 text-xs">${String.fromCharCode(65 + i)}</span>
+                                ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>`;
+        }
+
+        function checkAnswer(idx, btn) {
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(b => b.disabled = true);
+            
+            const q = quizData[state.idx];
+            const isCorrect = idx === q.correct;
+            if(isCorrect) state.score++;
+
+            btn.classList.add(isCorrect ? 'correct' : 'incorrect');
+            if(!isCorrect) buttons[q.correct].classList.add('correct', 'opacity-70');
+
+            setTimeout(() => showModal(isCorrect, q.feedback), 600);
+        }
+
+        function showModal(correct, text) {
+            const icon = document.getElementById('feedback-icon-container');
+            const title = document.getElementById('feedback-title');
+            icon.className = `w-16 h-16 mx-auto rounded-full flex items-center justify-center text-3xl mb-4 shadow-lg ${correct ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`;
+            icon.innerHTML = correct ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>';
+            title.innerText = correct ? '¡Correcto!' : 'Incorrecto';
+            title.className = `text-2xl font-bold mb-2 ${correct ? 'text-green-700' : 'text-red-700'}`;
+            document.getElementById('feedback-text').innerText = text;
+            
+            overlay.classList.remove('hidden');
+            setTimeout(() => {
+                overlay.classList.remove('opacity-0');
+                document.getElementById('feedback-card').classList.remove('scale-90', 'opacity-0');
+                document.getElementById('feedback-card').classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function nextQuestion() {
+            overlay.classList.add('opacity-0');
+            document.getElementById('feedback-card').classList.add('scale-90', 'opacity-0');
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                state.idx++;
+                if(state.idx < quizData.length) renderQuiz();
+                else renderEnd();
+            }, 300);
+        }
+
+        function renderEnd() {
+            const finalPct = Math.round((state.score / quizData.length) * 100);
+            content.innerHTML = `
+                <div class="flex flex-col h-full justify-center items-center text-center space-y-4 slide-up">
+                    <div id="result-card" class="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 w-full max-w-sm relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 to-purple-500"></div>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-1">${state.userName}</h2>
+                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-4">Resultado del Test</p>
+                        <div class="bg-indigo-50 rounded-2xl p-6 mb-4">
+                            <div class="text-5xl font-black text-indigo-600 mb-1">${finalPct}%</div>
+                            <div class="text-sm font-bold text-indigo-300">Score: ${state.score}/${quizData.length}</div>
+                        </div>
+                        <p class="text-xs text-gray-500 leading-relaxed font-medium">"El liderazgo es la capacidad de convertir una visión en realidad a través de otros."</p>
+                    </div>
+                    
+                    <button onclick="handleShareWhatsApp()" class="w-full max-w-xs bg-[#25D366] text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-3 active:scale-95 transition-transform">
+                        <i class="fab fa-whatsapp text-xl"></i> Compartir por WhatsApp
+                    </button>
+
+                    <button onclick="location.reload()" class="text-xs text-gray-400 font-bold uppercase tracking-widest hover:text-indigo-500 transition-colors">
+                        Reiniciar Test
+                    </button>
+                </div>`;
+        }
+
+        // --- LÓGICA DE COMPARTIR ADAPTADA ---
+        const handleShareWhatsApp = async () => {
+            loadingOverlay.classList.remove('hidden');
+            const messageText = `🎮 TEST DE LIDERAZGO\n\n🎯 Misión: Influencia\n👤 Player: ${state.userName}\n💠 Score: ${state.score}/${quizData.length}`;
+
+            await new Promise(resolve => setTimeout(resolve, 400));
+
+            const resultCard = document.getElementById('result-card');
+
+            if (resultCard && navigator.share) {
+                try {
+                    const canvas = await html2canvas(resultCard, {
+                        scale: 2,
+                        backgroundColor: "#ffffff",
+                        useCORS: true
+                    });
+                    
+                    canvas.toBlob(async (blob) => {
+                        if (blob) {
+                            const file = new File([blob], "resultado_liderazgo.png", { type: "image/png" });
+                            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                                try {
+                                    await navigator.share({
+                                        files: [file],
+                                        text: messageText,
+                                    });
+                                    loadingOverlay.classList.add('hidden');
+                                } catch (err) {
+                                    if(err.name !== 'AbortError') openWhatsAppTextFallback(messageText);
+                                    else loadingOverlay.classList.add('hidden');
+                                }
+                            } else {
+                                openWhatsAppTextFallback(messageText);
+                            }
+                        }
+                    });
+                } catch (error) {
+                    openWhatsAppTextFallback(messageText);
+                }
+            } else {
+                openWhatsAppTextFallback(messageText);
+            }
+        };
+
+        const openWhatsAppTextFallback = (text) => {
+            loadingOverlay.classList.add('hidden');
+            const url = `https://wa.me/${FALLBACK_PHONE}?text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank');
+        };
+
+        renderStart();
     </script>
 </body>
 </html>
